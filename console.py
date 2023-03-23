@@ -39,38 +39,29 @@ class HBNBCommand(cmd.Cmd):
         """Quit command to exit the program at end of file"""
         return True
 
-    def do_create(self, arg):
-    """Creates a new instance of BaseModel, saves it to JSON file and
-    prints the id
-    """
-    my_list = arg.split()
-    if not my_list:
-        print("** class name missing **")
-        return
-    if my_list[0] not in classes:
-        print("** class doesn't exist **")
-        return
-    new_instance = classes[my_list[0]]()
-    for param in my_list[1:]:
-        key, val = param.split('=', 1)
-        if val.startswith('"') and val.endswith('"'):
-            val = val[1:-1].replace('_', ' ')
-            val = val.replace('\\"', '"')
-            setattr(new_instance, key, val)
-        elif '.' in val:
-            try:
-                val = float(val)
-                setattr(new_instance, key, val)
-            except ValueError:
-                pass
-        else:
-            try:
-                val = int(val)
-                setattr(new_instance, key, val)
-            except ValueError:
-                pass
-    new_instance.save()
-    print(new_instance.id)
+    def do_create(self, line):
+        """Creates a new instance of BaseModel, saves it
+        Exceptions:
+            SyntaxError: when there is no args given
+            NameError: when there is no object taht has the name
+        """
+        try:
+            if not line:
+                raise SyntaxError()
+            my_list = line.split(" ")
+            obj = eval("{}()".format(my_list[0]))
+            # New code
+            for index in range(1, len(my_list)):
+                p_v = self.valid_param(my_list[index])
+                if p_v:
+                    obj.__dict__[p_v[0]] = p_v[1]
+            # End new code
+            obj.save()
+            print("{}".format(obj.id))
+        except SyntaxError:
+            print("** class name missing **")
+        except NameError:
+            print("** class doesn't exist **")
 
     # New code
     def valid_param(self, arg):
