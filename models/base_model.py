@@ -60,4 +60,3 @@ class BaseModel:
         """
         from models import storage
         storage.delete(self)
-
